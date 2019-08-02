@@ -1,9 +1,13 @@
 require('dotenv').config()
 import Discord from 'discord.js'
 
+const GOOD_EMOJI = ':ok_hand:'
+const BAD_EMOJI = ':thinking:'
+
 class TTVCBot {
   private token!: string
   private bot!: Discord.Client
+  private conPool: { [key: string]: Discord.VoiceConnection } = {}
 
   constructor(token: string | undefined) {
     if (!token) {
@@ -24,7 +28,7 @@ class TTVCBot {
   }
 
   private handleReady() {
-    this.bot.on('ready', () => console.log('✔ ログインしました。'))
+    this.bot.on('ready', () => console.log('✔ ログインしました！'))
   }
 
   private handleError() {
@@ -36,12 +40,78 @@ class TTVCBot {
       if (!msg.guild) return
       if (msg.author.id === this.bot.user.id) return
 
-      switch (msg.content) {
-        case '<ping>':
-          msg.channel.send(`<@!${msg.author.id}> pong!`)
-          break
+      const args = msg.content.match(/^>(.+)>$/)
+
+      if (args) {
+        switch (args[1]) {
+          case 'ping':
+            msg.channel.send(this.mentionMessage(msg.author.id, 'pong!'))
+            break
+
+          case 'join':
+            this.handleJoin(msg)
+            break
+
+          case 'leave':
+            this.handleLeave(msg)
+            break
+
+          default:
+            msg.channel.send(
+              this.mentionMessage(
+                msg.author.id,
+                `${BAD_EMOJI} \`${args[1]}\`というコマンドはありません。`
+              )
+            )
+        }
+
+        return
       }
     })
+  }
+
+  private async handleJoin(msg: Discord.Message) {
+    const vc: Discord.VoiceChannel = msg.member.voiceChannel
+
+    if (!vc) {
+      msg.channel.send(
+        this.mentionMessage(
+          msg.author.id,
+          `${BAD_EMOJI} 先にVCへ参加してください。`
+        )
+      )
+
+      return
+    }
+
+    this.conPool[msg.guild.id] = await vc.join()
+    msg.channel.send(
+      `${GOOD_EMOJI} :microphone2: **${vc.name}** に接続しました！`
+    )
+  }
+
+  private handleLeave(msg: Discord.Message) {
+    if (!this.conPool[msg.guild.id]) {
+      msg.channel.send(
+        this.mentionMessage(
+          msg.author.id,
+          `${BAD_EMOJI} 既に切断されています。`
+        )
+      )
+
+      return
+    }
+
+    this.leaveVC(msg.guild.id)
+    msg.channel.send(`${GOOD_EMOJI} 切断しました。`)
+  }
+
+  private leaveVC(guildId: string) {
+    this.conPool[guildId].disconnect()
+  }
+
+  private mentionMessage(userId: string, message: string) {
+    return `<@!${userId}> ${message}`
   }
 }
 
