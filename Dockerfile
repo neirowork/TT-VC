@@ -1,13 +1,13 @@
-FROM node:10.13-alpine
+FROM node:10.16.0-alpine
 
-RUN apk add python alpine-sdk ffmpeg
+RUN apk add python alpine-sdk
 
 RUN mkdir -p /tt-vc
 WORKDIR /tt-vc
 
 COPY package.json .
 COPY package-lock.json .
-RUN npm i -d
+RUN npm i
 
 COPY . .
 
