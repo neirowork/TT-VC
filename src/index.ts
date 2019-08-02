@@ -7,7 +7,9 @@ const BAD_EMOJI = ':thinking:'
 class TTVCBot {
   private token!: string
   private bot!: Discord.Client
-  private conPool: { [key: string]: Discord.VoiceConnection } = {}
+  private conPool: {
+    [key: string]: { channel: string; connection: Discord.VoiceConnection }
+  } = {}
 
   constructor(token: string | undefined) {
     if (!token) {
@@ -86,9 +88,21 @@ class TTVCBot {
       return
     }
 
-    this.conPool[msg.guild.id] = await vc.join()
+    this.conPool[msg.guild.id] = {
+      channel: msg.channel.id,
+      connection: await vc.join()
+    }
+
+    const ch: Discord.GuildChannel | undefined = msg.guild.channels.get(
+      msg.channel.id
+    )
+
+    if (!ch) return
+
     msg.channel.send(
-      `${GOOD_EMOJI} :microphone2: **${vc.name}** に接続しました！`
+      `${GOOD_EMOJI} :microphone2: **${vc.name}** :link: ${
+        ch.name
+      } に接続しました！`
     )
   }
 
@@ -110,9 +124,9 @@ class TTVCBot {
 
   private handleChat(msg: Discord.Message) {
     const con = this.conPool[msg.guild.id]
-    if (!con) return
+    if (!con || msg.channel.id !== con.channel) return
 
-    con
+    con.connection
       .playArbitraryInput(
         `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=${encodeURIComponent(
           msg.content
@@ -122,7 +136,8 @@ class TTVCBot {
   }
 
   private leaveVC(guildId: string) {
-    this.conPool[guildId].disconnect()
+    this.conPool[guildId].connection.disconnect()
+    this.conPool[guildId].channel = ''
   }
 
   private mentionMessage(userId: string, message: string) {
