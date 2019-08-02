@@ -161,8 +161,8 @@ class TTVCBot {
     pool.connection
       .playArbitraryInput(
         `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=${encodeURIComponent(
-          this.removeURL(msg.content)
-        ) + '。。。。。。。。。。'}`
+          this.removeURL(msg.content) + '。。。。。。。。。。'
+        )}`
       )
       .setVolume(1)
   }
