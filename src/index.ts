@@ -99,7 +99,8 @@ class TTVCBot {
 
     this.conPool[msg.guild.id] = {
       channel: msg.channel.id,
-      connection: await vc.join().catch(error => {
+      connection: await vc.join().catch(err => {
+        console.error(err);
         msg.channel.send(
           this.mentionMessage(
             msg.author.id,
@@ -158,13 +159,23 @@ class TTVCBot {
     if (!pool || !pool.connection || msg.channel.id !== pool.channel) return;
     if (msg.content.startsWith('>')) return;
 
-    pool.connection
-      .playArbitraryInput(
-        `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=${encodeURIComponent(
-          this.removeURL(msg.content)
-        ) + '。。。。。。。。。。'}`
-      )
-      .setVolume(1);
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=${encodeURIComponent(
+      this.removeURL(msg.content)
+    )}`;
+
+    const disp = pool.connection.playArbitraryInput(url);
+
+    disp.setVolume(1);
+
+    disp.on('debug', info => {
+      console.log(info);
+      msg.channel.send(info);
+    });
+
+    disp.on('error', err => {
+      console.error(err);
+      msg.channel.send(err);
+    });
   }
 
   private leaveVC(guildId: string) {
