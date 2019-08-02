@@ -8,7 +8,10 @@ class TTVCBot {
   private token!: string
   private bot!: Discord.Client
   private conPool: {
-    [key: string]: { channel: string; connection: Discord.VoiceConnection }
+    [key: string]: {
+      channel: string
+      connection: void | Discord.VoiceConnection
+    }
   } = {}
 
   constructor(token: string | undefined) {
@@ -58,6 +61,10 @@ class TTVCBot {
             this.handleLeave(msg)
             break
 
+          case 'h-leave':
+            this.handleHardLeave(msg)
+            break
+
           default:
             msg.channel.send(
               this.mentionMessage(
@@ -90,7 +97,14 @@ class TTVCBot {
 
     this.conPool[msg.guild.id] = {
       channel: msg.channel.id,
-      connection: await vc.join()
+      connection: await vc.join().catch(error => {
+        msg.channel.send(
+          this.mentionMessage(
+            msg.author.id,
+            `${BAD_EMOJI} VCに参加できませんでした。`
+          )
+        )
+      })
     }
 
     const ch: Discord.GuildChannel | undefined = msg.guild.channels.get(
@@ -108,13 +122,13 @@ class TTVCBot {
 
   private handleLeave(msg: Discord.Message) {
     if (!this.conPool[msg.guild.id]) {
+      msg.member.voiceChannelID
       msg.channel.send(
         this.mentionMessage(
           msg.author.id,
           `${BAD_EMOJI} 既に切断されています。`
         )
       )
-
       return
     }
 
@@ -122,9 +136,26 @@ class TTVCBot {
     msg.channel.send(`${GOOD_EMOJI} 切断しました！`)
   }
 
+  private async handleHardLeave(msg: Discord.Message) {
+    const vc = msg.member.voiceChannel
+    if (!vc) {
+      msg.channel.send(
+        this.mentionMessage(
+          msg.author.id,
+          `${BAD_EMOJI} 先にVCへ参加してください。`
+        )
+      )
+
+      return
+    }
+
+    ;(await vc.join()).disconnect()
+    msg.channel.send(`${GOOD_EMOJI} 強制的に切断しました！`)
+  }
+
   private handleChat(msg: Discord.Message) {
     const pool = this.conPool[msg.guild.id]
-    if (!pool || msg.channel.id !== pool.channel) return
+    if (!pool || !pool.connection || msg.channel.id !== pool.channel) return
     if (msg.content.startsWith('>')) return
 
     pool.connection
@@ -137,8 +168,11 @@ class TTVCBot {
   }
 
   private leaveVC(guildId: string) {
-    this.conPool[guildId].connection.disconnect()
-    this.conPool[guildId].channel = ''
+    const pool = this.conPool[guildId]
+    if (!pool || !pool.connection) return
+
+    pool.connection.disconnect()
+    pool.channel = ''
   }
 
   private mentionMessage(userId: string, message: string) {
