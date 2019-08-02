@@ -180,7 +180,9 @@ class TTVCBot {
   }
 
   private removeURL(msg: string) {
-    return msg.replace(/https?:\/\/[\w\/:%#\$&\?\(\)~\.=\+\-]+ ?/gim, 'URL省略')
+    return msg
+      .replace(/https?:\/\/[\w\/:%#\$&\?\(\)~\.=\+\-]+ ?/gim, 'URL省略')
+      .replace(/<.+>/gim, '')
   }
 }
 
