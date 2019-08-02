@@ -129,7 +129,7 @@ class TTVCBot {
     pool.connection
       .playArbitraryInput(
         `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=${encodeURIComponent(
-          msg.content
+          this.removeURL(msg.content)
         ) + '。。。。。。。。。。'}`
       )
       .setVolume(1)
@@ -142,6 +142,10 @@ class TTVCBot {
 
   private mentionMessage(userId: string, message: string) {
     return `<@!${userId}> ${message}`
+  }
+
+  private removeURL(msg: string) {
+    return msg.replace(/https?:\/\/[\w\/:%#\$&\?\(\)~\.=\+\-]+ ?/gim, 'URL省略')
   }
 }
 
