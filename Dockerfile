@@ -7,7 +7,7 @@ WORKDIR /tt-vc
 
 COPY package.json .
 COPY package-lock.json .
-RUN npm i -d
+RUN npm i
 
 COPY . .
 

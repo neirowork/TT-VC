@@ -13,11 +13,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^12.6.9",
     "discord.js": "^11.5.1",
     "dotenv": "^8.0.0",
     "node-opus": "^0.3.2",
-    "opusscript": "0.0.6",
+    "opusscript": "0.0.6"
+  },
+  "devDependencies": {
+    "@types/node": "^12.6.9",
+    "prettier": "^1.18.2",
+    "tslint": "^5.18.0",
+    "tslint-plugin-prettier": "^2.0.1",
     "typescript": "^3.5.3"
   }
 }
