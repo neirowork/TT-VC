@@ -125,6 +125,7 @@ class TTVCBot {
   private handleChat(msg: Discord.Message) {
     const pool = this.conPool[msg.guild.id]
     if (!pool || msg.channel.id !== pool.channel) return
+    if (msg.content.startsWith('>')) return
 
     pool.connection
       .playArbitraryInput(
