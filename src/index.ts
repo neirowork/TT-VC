@@ -8,7 +8,7 @@ class TTVCBot {
   private token!: string
   private bot!: Discord.Client
   private conPool: { [key: string]: Discord.VoiceConnection } = {}
-  private dispatcherPool: {}
+
   constructor(token: string | undefined) {
     if (!token) {
       throw new ReferenceError('トークンがセットされていません。')
