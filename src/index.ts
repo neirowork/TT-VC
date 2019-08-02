@@ -117,7 +117,9 @@ class TTVCBot {
     if (!ch) return;
 
     msg.channel.send(
-      `${GOOD_EMOJI} **:microphone2: ${vc.name} <- :link: -- :speech_balloon: ${ch.name}** に接続しました！`
+      `${GOOD_EMOJI} **:microphone2: ${vc.name} <- :link: -- :speech_balloon: ${
+        ch.name
+      }** に接続しました！`
     );
   }
 
@@ -159,8 +161,9 @@ class TTVCBot {
     if (!pool || !pool.connection || msg.channel.id !== pool.channel) return;
     if (msg.content.startsWith('>')) return;
 
+    // 「。。。。。。。。。。」で時間稼ぎしないと、途中で音声が入らなくなる。
     const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=${encodeURIComponent(
-      this.removeURL(msg.content)
+      this.removeURL(msg.content) + '。。。。。。。。。。'
     )}`;
 
     const disp = pool.connection.playArbitraryInput(url);
