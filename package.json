@@ -16,6 +16,9 @@
     "@types/node": "^12.6.9",
     "discord.js": "^11.5.1",
     "dotenv": "^8.0.0",
+    "ffmpeg-binaries": "^4.0.0",
+    "node-opus": "^0.3.2",
+    "opusscript": "0.0.6",
     "typescript": "^3.5.3"
   }
 }

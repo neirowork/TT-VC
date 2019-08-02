@@ -8,7 +8,7 @@ class TTVCBot {
   private token!: string
   private bot!: Discord.Client
   private conPool: { [key: string]: Discord.VoiceConnection } = {}
-
+  private dispatcherPool: {}
   constructor(token: string | undefined) {
     if (!token) {
       throw new ReferenceError('トークンがセットされていません。')
@@ -67,6 +67,8 @@ class TTVCBot {
 
         return
       }
+
+      this.handleChat(msg)
     })
   }
 
@@ -103,7 +105,20 @@ class TTVCBot {
     }
 
     this.leaveVC(msg.guild.id)
-    msg.channel.send(`${GOOD_EMOJI} 切断しました。`)
+    msg.channel.send(`${GOOD_EMOJI} 切断しました！`)
+  }
+
+  private handleChat(msg: Discord.Message) {
+    const con = this.conPool[msg.guild.id]
+    if (!con) return
+
+    con
+      .playArbitraryInput(
+        `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=${encodeURIComponent(
+          msg.content
+        ) + '。。。。。'}`
+      )
+      .setVolume(1)
   }
 
   private leaveVC(guildId: string) {
