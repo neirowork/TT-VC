@@ -60,5 +60,6 @@ typings/
 # next.js build output
 .next
 
-# yougrid build output
-.shortter
+# build output
+.dist/
+dist/
