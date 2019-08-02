@@ -1,7 +1,7 @@
 require('dotenv').config()
 import Discord from 'discord.js'
 
-const GOOD_EMOJI = ':ok_hand:'
+const GOOD_EMOJI = ':white_check_mark:'
 const BAD_EMOJI = ':thinking:'
 
 class TTVCBot {
@@ -100,9 +100,9 @@ class TTVCBot {
     if (!ch) return
 
     msg.channel.send(
-      `${GOOD_EMOJI} :microphone2: **${vc.name}** :link: ${
+      `${GOOD_EMOJI} **:microphone2: ${vc.name} <- :link: -- :speech_balloon: ${
         ch.name
-      } に接続しました！`
+      }** に接続しました！`
     )
   }
 
@@ -123,10 +123,10 @@ class TTVCBot {
   }
 
   private handleChat(msg: Discord.Message) {
-    const con = this.conPool[msg.guild.id]
-    if (!con || msg.channel.id !== con.channel) return
+    const pool = this.conPool[msg.guild.id]
+    if (!pool || msg.channel.id !== pool.channel) return
 
-    con.connection
+    pool.connection
       .playArbitraryInput(
         `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=${encodeURIComponent(
           msg.content
